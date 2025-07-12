@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
+import { ErrorFilter } from 'src/common/error.filter';
 
 describe('UserController', () => {
   let app: INestApplication;
@@ -12,6 +13,7 @@ describe('UserController', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.useGlobalFilters(app.get(ErrorFilter));
     await app.init();
   });
 
