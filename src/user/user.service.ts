@@ -28,7 +28,15 @@ export class UserService {
         });
 
         if (totalUserWithSameUsername != 0) {
-            throw new HttpException('Username telah ada', 400);
+            throw new HttpException({
+                errors: 'Validation error by prisma checking',
+                details: [
+                    {
+                        path: ['username'],
+                        message: 'Username telah ada'
+                    }
+                ]
+            }, 400);
         }
 
         registerRequest.password = await bcrypt.hash(registerRequest.password, 10); // 10 adalah kompleksitasnya
