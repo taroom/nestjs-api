@@ -2,10 +2,11 @@ import { HttpException, Inject, Injectable } from "@nestjs/common";
 import { WINSTON_MODULE_PROVIDER } from "nest-winston";
 import { PrismaService } from "src/common/prisma.service";
 import { ValidationService } from "src/common/validation.service";
-import { RegisterUserRequest, UserResponse } from "src/model/user.model";
+import { LoginUserRequest, RegisterUserRequest, UserResponse } from "src/model/user.model";
 import { UserValidation } from "./user.validation";
 import * as bcrypt from 'bcrypt';
 import { Logger } from 'winston';
+import { v4 as uuid } from 'uuid';
 
 @Injectable()
 export class UserService {
@@ -18,7 +19,7 @@ export class UserService {
 
     async register(request: RegisterUserRequest): Promise<UserResponse> {
         // pendaftaran
-        this.logger.info(`Register new user ${JSON.stringify(request)}`);
+        this.logger.info(`UserService.register() request data ${JSON.stringify(request)}`);
         const registerRequest: RegisterUserRequest = this.validationService.validate(UserValidation.REGISTER, request);
 
         const totalUserWithSameUsername = await this.prismaService.user.count({
@@ -51,5 +52,44 @@ export class UserService {
         };
 
 
+    }
+
+    async login(request: LoginUserRequest): Promise<UserResponse> {
+        this.logger.info(`UserService.login() request data ${JSON.stringify(request)}`);
+
+        const loginRequest: LoginUserRequest = this.validationService.validate(UserValidation.LOGIN, request);
+
+        // cari user di database
+        let user = await this.prismaService.user.findUnique({
+            where: {
+                username: loginRequest.username
+            }
+        });
+
+        if (!user) {
+            throw new HttpException('Username or password is invalid', 401);
+        }
+
+        const isPasswordValid = await bcrypt.compare(loginRequest.password, user.password);
+
+        if (!isPasswordValid) {
+            throw new HttpException('Username or password is invalid', 401);
+        }
+
+        //update token
+        await this.prismaService.user.update({
+            where: {
+                username: loginRequest.username
+            },
+            data: {
+                token: uuid()
+            }
+        })
+
+        return {
+            username: user.username,
+            name: user.name,
+            token: user.token // token tidak boleh dikirimkan ke user, tapi di database ada, jadi harus diambil dari database bukan dari request
+        };
     }
 }

@@ -9,3 +9,8 @@ export class UserResponse { // coba lihat lagi specnya  disitu kembalian respons
     name: string;
     token?: string;//tidak harus ada, beberapa response tidak wajib
 }
+
+export class LoginUserRequest {
+    username: string;
+    password: string;
+}
