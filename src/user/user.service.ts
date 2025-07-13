@@ -138,4 +138,25 @@ export class UserService {
         // this.logger.info(`user on UserService.update() tobe ${JSON.stringify(user)}`);
         // this.logger.info(`result of update prisma UserService.update() tobe ${JSON.stringify(result)}`);
     }
+
+    async logout(user: User): Promise<UserResponse> {
+        try {
+            const result = await this.prismaService.user.update({
+                where: {
+                    username: user.username
+                },
+                data: {
+                    token: null
+                }
+            });
+
+            return {
+                username: result.username,
+                name: result.name
+            };
+        } catch (e) {
+            this.logger.error(`Failed to update user: ${e.message}`, e);
+            throw new HttpException('User not found or update failed', 404);
+        }
+    }
 }
