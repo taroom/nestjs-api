@@ -115,4 +115,37 @@ describe('UserController', () => {
       // toBeDefined itu artinya yang penting ada data yang dikembalikan. apapun kembaliannya
     });
   });
+
+  describe("POST /api/users/current", () => {
+    beforeEach(async () => {
+      await testService.deleteUser();
+      await testService.createUser();
+    });
+
+    it("should be rejected if use wrong authorization token", async () => {
+      const response = await request(app.getHttpServer())
+        .get('/api/users/current')
+        .set('authorization', 'salah');
+
+      logger.info(response.body);
+
+      expect(response.status).toBe(401);
+      expect(response.body.errors).toBeDefined();
+    });
+
+
+
+    it("should be able to get user current with right authorization token", async () => {
+      const response = await request(app.getHttpServer())
+        .get('/api/users/current')
+        .set('authorization', 'test');
+
+      logger.info(response.body);
+
+      expect(response.status).toBe(200);
+      expect(response.body.data.username).toBe('taroom');
+      expect(response.body.data.name).toBe('Agus Sutarom');
+      // toBeDefined itu artinya yang penting ada data yang dikembalikan. apapun kembaliannya
+    });
+  });
 });

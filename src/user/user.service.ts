@@ -7,6 +7,7 @@ import { UserValidation } from "./user.validation";
 import * as bcrypt from 'bcrypt';
 import { Logger } from 'winston';
 import { v4 as uuid } from 'uuid';
+import { User } from "@prisma/client";
 
 @Injectable()
 export class UserService {
@@ -90,6 +91,13 @@ export class UserService {
             username: user.username,
             name: user.name,
             token: user.token // token tidak boleh dikirimkan ke user, tapi di database ada, jadi harus diambil dari database bukan dari request
+        };
+    }
+
+    async get(user: User): Promise<UserResponse> {
+        return {
+            username: user.username,
+            name: user.name
         };
     }
 }

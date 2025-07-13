@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "src/common/prisma.service";
 import * as bcrypt from 'bcrypt';
+import { v4 as uuid } from 'uuid';
 
 @Injectable()
 export class TestService {
@@ -23,7 +24,8 @@ export class TestService {
                 username: 'taroom',
                 name: 'Agus Sutarom',
                 password: await bcrypt.hash('taroom', 10),
-                token: 'token'
+                token: 'test'
+                // token: uuid()
             }
         })
     }
