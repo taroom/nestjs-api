@@ -14,3 +14,9 @@ export class LoginUserRequest {
     username: string;
     password: string;
 }
+
+export class UpdateUserRequest {
+    // pembatasan pengubahan data pada password (optional) atau name (optional)
+    password?: string;
+    name?: string;
+}

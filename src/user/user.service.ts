@@ -2,7 +2,7 @@ import { HttpException, Inject, Injectable } from "@nestjs/common";
 import { WINSTON_MODULE_PROVIDER } from "nest-winston";
 import { PrismaService } from "src/common/prisma.service";
 import { ValidationService } from "src/common/validation.service";
-import { LoginUserRequest, RegisterUserRequest, UserResponse } from "src/model/user.model";
+import { LoginUserRequest, RegisterUserRequest, UpdateUserRequest, UserResponse } from "src/model/user.model";
 import { UserValidation } from "./user.validation";
 import * as bcrypt from 'bcrypt';
 import { Logger } from 'winston';
@@ -99,5 +99,43 @@ export class UserService {
             username: user.username,
             name: user.name
         };
+    }
+
+    async update(user: User, request: UpdateUserRequest): Promise<UserResponse> {
+        this.logger.info(`UserService.update( ${JSON.stringify(user)} , ${JSON.stringify(request)} )`);
+
+        // jika pakai logger.info maka password akan kelihatan, saat production gunakan logger.debug aja
+
+        const updateRequest: UpdateUserRequest = this.validationService.validate(UserValidation.UPDATE, request);
+
+        if (updateRequest.name) {
+            user.name = updateRequest.name;
+        }
+
+        if (updateRequest.password) {
+            user.password = await bcrypt.hash(updateRequest.password, 10);
+        }
+
+        try {
+            const result = await this.prismaService.user.update({
+                where: {
+                    username: user.username
+                },
+                data: user
+            });
+
+            this.logger.info(`result of update prisma UserService.update() to be ${JSON.stringify(result)}`);
+
+            return {
+                username: result.username,
+                name: result.name
+            };
+        } catch (e) {
+            this.logger.error(`Failed to update user: ${e.message}`, e);
+            throw new HttpException('User not found or update failed', 404);
+        }
+
+        // this.logger.info(`user on UserService.update() tobe ${JSON.stringify(user)}`);
+        // this.logger.info(`result of update prisma UserService.update() tobe ${JSON.stringify(result)}`);
     }
 }
