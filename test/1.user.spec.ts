@@ -28,6 +28,7 @@ describe('UserController', () => {
 
   describe("POST /api/users", () => {
     beforeEach(async () => {
+      await testService.deleteContact();
       await testService.deleteUser();
     });
 
@@ -52,8 +53,7 @@ describe('UserController', () => {
           "username": "taroom",
           "password": "tarooom",
           "name": "Agus Sutarom"
-        })
-
+        });
 
       expect(response.status).toBe(200);
       expect(response.body.data.username).toBe('taroom');
@@ -75,6 +75,7 @@ describe('UserController', () => {
       expect(response.body.errors).toBeDefined();
     });
   });
+
 
   describe("POST /api/users/login", () => {
     beforeEach(async () => {
@@ -220,7 +221,6 @@ describe('UserController', () => {
     });
 
 
-
     it("should be able to logout with right authorization token", async () => {
       const response = await request(app.getHttpServer())
         .delete('/api/users/current')
@@ -235,5 +235,10 @@ describe('UserController', () => {
       const user = await testService.getUser();
       expect(user.token).toBeNull();
     });
+  });
+
+  afterAll(async () => {
+    await testService.deleteContact();
+    await testService.deleteUser();
   });
 });
