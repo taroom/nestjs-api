@@ -1,7 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "src/common/prisma.service";
 import * as bcrypt from 'bcrypt';
-import { v4 as uuid } from 'uuid';
 import { User } from "@prisma/client";
 
 @Injectable()
@@ -11,12 +10,37 @@ export class TestService {
     ) { }
 
     // persiapan untuk delete user
+    async deleteAll() {
+        await this.deleteContact();
+        await this.deleteUser();
+    }
+
     async deleteUser() {
-        await this.prismaService.user.deleteMany({
+        const userDelete = await this.prismaService.user.deleteMany({
             where: {
                 username: 'taroom'
             }
-        })
+        });
+
+        if (userDelete.count > 0) {
+            console.log('User deleted');
+        } else {
+            console.log('No user found to delete');
+        }
+    }
+
+    async deleteContact() {
+        const contactDelete = await this.prismaService.contact.deleteMany({
+            where: {
+                username: 'taroom'
+            }
+        });
+
+        if (contactDelete.count > 0) {
+            console.log('Contact deleted');
+        } else {
+            console.log('No contact found to delete');
+        }
     }
 
     async getUser(): Promise<User> {
