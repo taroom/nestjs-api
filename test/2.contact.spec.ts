@@ -115,4 +115,73 @@ describe('ContactController', () => {
       await testService.deleteUser();
     });
   });
+
+  describe("PUT /api/contacts/:contactId", () => {
+    beforeEach(async () => {
+      await testService.deleteContact();
+      await testService.deleteUser();
+
+      await testService.createUser();
+      await testService.createContact();
+    });
+
+    it("should be rejected if request is invalid", async () => {
+      const contact = await testService.getContact();
+      const response = await request(app.getHttpServer())
+        .put(`/api/contacts/${contact.id}`)
+        .set('authorization', 'test')
+        .send({
+          first_name: '',
+          last_name: '',
+          email: 'wrong',
+          phone: ''
+        });
+
+      logger.info(response.body);
+
+
+      expect(response.status).toBe(400);
+      expect(response.body.errors).toBeDefined();
+    });
+
+    it("should be rejected if contact not found", async () => {
+      const contact = await testService.getContact();
+      const response = await request(app.getHttpServer())
+        .put(`/api/contacts/${contact.id + 1}`)
+        .set('authorization', 'test')
+        .send({
+          first_name: 'd',
+          last_name: 'd',
+          email: 'wrong@gmail.com',
+          phone: '6225555'
+        });
+
+      logger.info(response.body);
+
+
+      expect(response.status).toBe(404);
+      expect(response.body.errors).toBeDefined();
+    });
+
+    it("should be able to update contact", async () => {
+      const contact = await testService.getContact();
+      const response = await request(app.getHttpServer())
+        .put(`/api/contacts/${contact.id}`)
+        .set('authorization', 'test')
+        .send({
+          first_name: 'Sultan',
+          last_name: 'Ramones',
+          email: 'ramonezz@gmail.com',
+          phone: '6288888888888'
+        })
+
+
+      expect(response.status).toBe(200);
+      expect(response.body.data.first_name).toBe('Sultan');
+      expect(response.body.data.last_name).toBe('Ramones');
+      expect(response.body.data.email).toBe('ramonezz@gmail.com');
+      expect(response.body.data.phone).toBe('6288888888888');
+      expect(response.body.data.id).toBeDefined();
+    });
+  });
 });

@@ -1,7 +1,7 @@
-import { Body, Controller, Get, HttpCode, Param, ParseIntPipe, Post } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, Param, ParseIntPipe, Patch, Post, Put } from "@nestjs/common";
 import { ContactService } from "./contact.service";
 import { User } from "@prisma/client";
-import { ContactResponse, CreateContactRequest } from "src/model/contact.model";
+import { ContactResponse, CreateContactRequest, UpdateContactRequest } from "src/model/contact.model";
 import { request } from "http";
 import { Auth } from "src/common/auth.decorator";
 import { WebResponse } from "src/model/web.model";
@@ -30,6 +30,20 @@ export class ContactController {
         @Param('contactId', ParseIntPipe) contactId: number
     ): Promise<WebResponse<ContactResponse>> {
         const result = await this.contactService.get(user, contactId);
+        return {
+            data: result
+        };
+    }
+
+    @Put('/:contactId')
+    @HttpCode(200)
+    async update(
+        @Auth() user: User,
+        @Param('contactId', ParseIntPipe) contactId: number,
+        @Body() request: UpdateContactRequest
+    ): Promise<WebResponse<ContactResponse>> {
+        request.id = contactId; // Set the contactId to the request object
+        const result = await this.contactService.update(user, request);
         return {
             data: result
         };
