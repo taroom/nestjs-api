@@ -1,7 +1,7 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Patch, Post, Put } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Patch, Post, Put, Query } from "@nestjs/common";
 import { ContactService } from "./contact.service";
 import { User } from "@prisma/client";
-import { ContactResponse, CreateContactRequest, UpdateContactRequest } from "src/model/contact.model";
+import { ContactResponse, CreateContactRequest, SearchContactRequest, UpdateContactRequest } from "src/model/contact.model";
 import { request } from "http";
 import { Auth } from "src/common/auth.decorator";
 import { WebResponse } from "src/model/web.model";
@@ -59,5 +59,28 @@ export class ContactController {
         return {
             data: true
         };
+    }
+
+    @Get()
+    @HttpCode(200)
+    async search(
+        @Auth() user: User,
+        @Query('name') name?: string,
+        @Query('email') email?: string,
+        @Query('phone') phone?: string,
+        @Query('page', new ParseIntPipe({ optional: true })) page?: number,//parseIntPipe digunakan untuk mengkonversi string ke number, sifatnya required kecuali dalam bentuk new ParseIntPipe({ optional: true }) yang berarti parameter ini opsional
+        @Query('size', new ParseIntPipe({ optional: true })) size?: number
+    ): Promise<WebResponse<ContactResponse[]>> {
+        // create request
+        const request: SearchContactRequest = {
+            name: name,
+            email: email,
+            phone: phone,
+            page: page || 1, // default to page 1 if not provided
+            size: size || 10 // default to size 10 if not provided
+        };
+
+
+        return this.contactService.search(user, request);
     }
 }

@@ -223,4 +223,118 @@ describe('ContactController', () => {
       await testService.deleteUser();
     });
   });
+
+  describe("GET /api/contacts search activities", () => {
+    beforeEach(async () => {
+      await testService.deleteContact();
+      await testService.deleteUser();
+
+      await testService.createUser();
+      await testService.createContact();
+    });
+
+    it("should be able to search contact even no query params", async () => {
+      const response = await request(app.getHttpServer())
+        .get(`/api/contacts`)
+        .set('authorization', 'test');
+
+      expect(response.status).toBe(200);
+      expect(response.body.data.length).toBe(1);
+    });
+
+    it("should be able to search contact with query params name no exist", async () => {
+      const response = await request(app.getHttpServer())
+        .get(`/api/contacts`)
+        .set('authorization', 'test')
+        .query({
+          name: '$',
+        });
+
+      expect(response.status).toBe(200);
+      expect(response.body.data.length).toBe(0);
+    });
+
+    it("should be able to search contact with query params name exist", async () => {
+      const response = await request(app.getHttpServer())
+        .get(`/api/contacts`)
+        .set('authorization', 'test')
+        .query({
+          name: 'gus',
+        });
+
+      expect(response.status).toBe(200);
+      expect(response.body.data.length).toBe(1);
+    });
+
+    it("should be able to search contact with query params email", async () => {
+      const response = await request(app.getHttpServer())
+        .get(`/api/contacts`)
+        .set('authorization', 'test')
+        .query({
+          email: '@gmail.com',
+        });
+
+      expect(response.status).toBe(200);
+      expect(response.body.data.length).toBe(1);
+    });
+
+    it("should be able to search contact with query params email no exist", async () => {
+      const response = await request(app.getHttpServer())
+        .get(`/api/contacts`)
+        .set('authorization', 'test')
+        .query({
+          email: '@gmailx.com',
+        });
+
+      expect(response.status).toBe(200);
+      expect(response.body.data.length).toBe(0);
+    });
+
+    it("should be able to search contact with query params phone", async () => {
+      const response = await request(app.getHttpServer())
+        .get(`/api/contacts`)
+        .set('authorization', 'test')
+        .query({
+          phone: '789',
+        });
+
+      expect(response.status).toBe(200);
+      expect(response.body.data.length).toBe(1);
+    });
+
+    it("should be able to search contact with query params phone no exist", async () => {
+      const response = await request(app.getHttpServer())
+        .get(`/api/contacts`)
+        .set('authorization', 'test')
+        .query({
+          phone: '788',
+        });
+
+      expect(response.status).toBe(200);
+      expect(response.body.data.length).toBe(0);
+    });
+
+
+    it("should be able to search contact with query params size over quota", async () => {
+      const response = await request(app.getHttpServer())
+        .get(`/api/contacts`)
+        .set('authorization', 'test')
+        .query({
+          size: 1,
+          page: 2
+        });
+
+      expect(response.status).toBe(200);
+      expect(response.body.data.length).toBe(0);
+      expect(response.body.paging.size).toBe(1);
+      expect(response.body.paging.current_page).toBe(2);
+      expect(response.body.paging.total_page).toBe(1);
+    });
+
+
+    afterAll(async () => {
+      await testService.deleteContact();
+      await testService.deleteUser();
+    });
+  });
 });

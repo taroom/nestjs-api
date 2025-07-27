@@ -3,9 +3,10 @@ import { Contact, User } from "@prisma/client";
 import { WINSTON_MODULE_PROVIDER } from "nest-winston";
 import { PrismaService } from "src/common/prisma.service";
 import { ValidationService } from "src/common/validation.service";
-import { ContactResponse, CreateContactRequest, UpdateContactRequest } from "src/model/contact.model";
+import { ContactResponse, CreateContactRequest, SearchContactRequest, UpdateContactRequest } from "src/model/contact.model";
 import { Logger } from "winston";
 import { ContactValidation } from "./contact.validation";
+import { WebResponse } from "src/model/web.model";
 
 @Injectable()
 export class ContactService {
@@ -88,5 +89,76 @@ export class ContactService {
         });
 
         return this.toContactResponse(contact);
+    }
+
+    async search(user: User, request: SearchContactRequest): Promise<WebResponse<ContactResponse[]>> {
+        // ambil request dan validasi
+        const searchRequest: SearchContactRequest = this.validationService.validate(ContactValidation.SEARCH, request);
+
+        console.log('Search request in service:', searchRequest);
+
+        const filteredRequest = []; // ikutin gaya penulisan prisma js
+
+        if (searchRequest.name) {
+            filteredRequest.push({
+                OR: [
+                    {
+                        first_name: {
+                            contains: searchRequest.name
+                        }
+                    },
+                    {
+                        last_name: {
+                            contains: searchRequest.name
+                        }
+                    }
+                ]
+            });
+        }
+
+        if (searchRequest.email) {
+            filteredRequest.push({
+                email: {
+                    contains: searchRequest.email
+                }
+            });
+        }
+
+        if (searchRequest.phone) {
+            filteredRequest.push({
+                phone: {
+                    contains: searchRequest.phone
+                }
+            });
+        }
+
+        const page = searchRequest.page ?? 1;
+        const size = searchRequest.size ?? 10;
+
+
+        const contacts = await this.prismaService.contact.findMany({
+            where: {
+                username: user.username,
+                AND: filteredRequest
+            },
+            skip: (page - 1) * size,
+            take: size
+        });
+
+        const totalData = await this.prismaService.contact.count({
+            where: {
+                username: user.username,
+                AND: filteredRequest
+            }
+        });
+
+        return {
+            data: contacts.map(contact => this.toContactResponse(contact)),
+            paging: {
+                size: size,
+                total_page: Math.ceil(totalData / size),
+                current_page: page
+            }
+        };
     }
 }
