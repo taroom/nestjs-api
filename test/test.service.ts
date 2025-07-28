@@ -16,33 +16,8 @@ export class TestService {
         await this.deleteUser();
     }
 
-    async deleteUser() {
-        const userDelete = await this.prismaService.user.deleteMany({
-            where: {
-                username: 'taroom'
-            }
-        });
 
-        if (userDelete.count > 0) {
-            console.log('User deleted');
-        } else {
-            console.log('No user found to delete');
-        }
-    }
 
-    async deleteContact() {
-        const contactDelete = await this.prismaService.contact.deleteMany({
-            where: {
-                username: 'taroom'
-            }
-        });
-
-        if (contactDelete.count > 0) {
-            console.log('Contact deleted');
-        } else {
-            console.log('No contact found to delete');
-        }
-    }
 
     async getUser(): Promise<User> {
         return this.prismaService.user.findUnique({
@@ -64,6 +39,20 @@ export class TestService {
         })
     }
 
+    async deleteUser() {
+        const userDelete = await this.prismaService.user.deleteMany({
+            where: {
+                username: 'taroom'
+            }
+        });
+
+        if (userDelete.count > 0) {
+            console.log('User deleted');
+        } else {
+            console.log('No user found to delete');
+        }
+    }
+
     async getContact(): Promise<Contact> {
         return this.prismaService.contact.findFirst({
             where: {
@@ -82,5 +71,48 @@ export class TestService {
                 username: 'taroom'
             }
         });
+    }
+
+    async deleteContact() {
+        const contactDelete = await this.prismaService.contact.deleteMany({
+            where: {
+                username: 'taroom'
+            }
+        });
+
+        if (contactDelete.count > 0) {
+            console.log('Contact deleted');
+        } else {
+            console.log('No contact found to delete');
+        }
+    }
+
+    async createAddress() {
+        await this.prismaService.address.create({
+            data: {
+                contact_id: 1, // assuming contact_id is 1 for testing
+                street: 'Raya Merdeka',
+                city: 'Tuban',
+                province: 'Jawa Timur',
+                country: 'Indonesia',
+                postal_code: '62355'
+            }
+        });
+    }
+
+    async deleteAddress() {
+        const addressDelete = await this.prismaService.address.deleteMany({
+            where: {
+                user_contacts: {
+                    username: 'taroom'
+                }
+            }
+        });
+
+        if (addressDelete.count > 0) {
+            console.log('Address deleted');
+        } else {
+            console.log('No address found to delete');
+        }
     }
 } 
