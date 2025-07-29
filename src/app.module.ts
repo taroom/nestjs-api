@@ -9,4 +9,4 @@ import { AddressModule } from './address/address.module';
   controllers: [],
   providers: [ErrorFilter],
 })
-export class AppModule { }
+export class AppModule {}

@@ -9,26 +9,29 @@ import { AuthMiddleware } from './auth.middleware';
 
 @Global()
 @Module({
-    imports: [
-        WinstonModule.forRoot({
-            format: winston.format.json(),
-            transports: [
-                new winston.transports.Console()
-            ],
-        }),
-        ConfigModule.forRoot({ // ? untuk apa ?
-            isGlobal: true
-        }),
-    ],
-    providers: [PrismaService, ValidationService, {
-        provide: 'EXCEPTION_FILTER',
-        useClass: ErrorFilter
-    }],
-    exports: [PrismaService, ValidationService]
+  imports: [
+    WinstonModule.forRoot({
+      format: winston.format.json(),
+      transports: [new winston.transports.Console()],
+    }),
+    ConfigModule.forRoot({
+      // ? untuk apa ?
+      isGlobal: true,
+    }),
+  ],
+  providers: [
+    PrismaService,
+    ValidationService,
+    {
+      provide: 'EXCEPTION_FILTER',
+      useClass: ErrorFilter,
+    },
+  ],
+  exports: [PrismaService, ValidationService],
 })
 export class CommonModule implements NestModule {
-    configure(consumer: MiddlewareConsumer) {
-        // implementasikan ke semua route
-        consumer.apply(AuthMiddleware).forRoutes('/api/*');
-    }
+  configure(consumer: MiddlewareConsumer) {
+    // implementasikan ke semua route
+    consumer.apply(AuthMiddleware).forRoutes('/api/*');
+  }
 }
