@@ -320,4 +320,52 @@ describe('AddressController', () => {
       await testService.deleteUser();
     });
   });
+
+  describe("GET /api/contacts/:contactId/addresses", () => {
+    beforeEach(async () => {
+      await testService.deleteAddress();
+      await testService.deleteContact();
+      await testService.deleteUser();
+
+      await testService.createUser();
+      await testService.createContact();
+      await testService.createAddress();
+    });
+
+    it("should be rejected if contact is not found", async () => {
+      const contact = await testService.getContact();
+
+      const response = await request(app.getHttpServer())
+        .get(`/api/contacts/${contact.id + 1}/addresses`)
+        .set('authorization', 'test');
+
+      logger.info(response.body);
+
+
+      expect(response.status).toBe(404);
+      expect(response.body.errors).toBeDefined();
+    });
+
+    it("should be able to list address", async () => {
+      const contact = await testService.getContact();
+      const response = await request(app.getHttpServer())
+        .get(`/api/contacts/${contact.id}/addresses`)
+        .set('authorization', 'test');
+
+      expect(response.status).toBe(200);
+      expect(response.body.data.length).toBe(1);
+      expect(response.body.data[0].street).toBe('Raya Merdeka');
+      expect(response.body.data[0].city).toBe('Tuban');
+      expect(response.body.data[0].province).toBe('Jawa Timur');
+      expect(response.body.data[0].country).toBe('Indonesia');
+      expect(response.body.data[0].postal_code).toBe('62355');
+      expect(response.body.data[0].id).toBeDefined();
+    });
+
+    afterAll(async () => {
+      await testService.deleteAddress();
+      await testService.deleteContact();
+      await testService.deleteUser();
+    });
+  });
 });
