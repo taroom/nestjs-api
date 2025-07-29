@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "src/common/prisma.service";
 import * as bcrypt from 'bcrypt';
-import { User } from "@prisma/client";
+import { Address, User } from "@prisma/client";
 import { Contact } from "generated/prisma";
 
 @Injectable()
@@ -88,9 +88,10 @@ export class TestService {
     }
 
     async createAddress() {
+        const contact = await this.getContact();
         await this.prismaService.address.create({
             data: {
-                contact_id: 1, // assuming contact_id is 1 for testing
+                contact_id: contact.id, // assuming contact_id is 1 for testing
                 street: 'Raya Merdeka',
                 city: 'Tuban',
                 province: 'Jawa Timur',
@@ -114,5 +115,15 @@ export class TestService {
         } else {
             console.log('No address found to delete');
         }
+    }
+
+    async getAddress(): Promise<Address> {
+        return this.prismaService.address.findFirst({
+            where: {
+                user_contacts: {
+                    username: 'taroom'
+                }
+            }
+        });
     }
 } 
