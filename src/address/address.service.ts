@@ -3,7 +3,7 @@ import { Address, User } from "@prisma/client";
 import { WINSTON_MODULE_PROVIDER } from "nest-winston";
 import { PrismaService } from "src/common/prisma.service";
 import { ValidationService } from "src/common/validation.service";
-import { AddressResponse, CreateAddressRequest, GetAddressRequest } from "src/model/address.model";
+import { AddressResponse, CreateAddressRequest, GetAddressRequest, UpdateAddressRequest } from "src/model/address.model";
 import { Logger } from "winston";
 import { AddressValidation } from "./address.validation";
 import { ContactService } from "src/contact/contact.service";
@@ -21,15 +21,11 @@ export class AddressService {
         // validate the request
         const createRequest: CreateAddressRequest = this.validationService.validate(AddressValidation.CREATE, request);
 
-        this.logger.info("Creating address");
-
         await this.contactService.checkContactExists(user.username, createRequest.contact_id);
 
         const address = await this.prismaService.address.create({
             data: createRequest
         });
-
-        this.logger.info("Creating address IN DB");
 
         return this.toAddressResponse(address);
     }
@@ -41,16 +37,7 @@ export class AddressService {
         const getRequest: GetAddressRequest = this.validationService.validate(AddressValidation.GET, request);
         await this.contactService.checkContactExists(user.username, getRequest.contact_id);
 
-        const address = await this.prismaService.address.findFirst({
-            where: {
-                id: getRequest.address_id,
-                contact_id: getRequest.contact_id
-            }
-        });
-
-        if (!address) {
-            throw new HttpException("Address not found", 404);
-        }
+        const address = await this.addressMustExist(getRequest.address_id, getRequest.contact_id);
 
         return this.toAddressResponse(address);
     }
@@ -66,8 +53,40 @@ export class AddressService {
         }
     }
 
-    async update() {
-        this.logger.info("Creating address");
+    async addressMustExist(addressId: number, contactId: number): Promise<Address> {
+        const address = await this.prismaService.address.findFirst({
+            where: {
+                id: addressId,
+                contact_id: contactId
+            }
+        });
+
+        if (!address) {
+            throw new HttpException("Address not found", 404);
+        }
+
+        return address;
+    }
+
+    async update(user: User, request: UpdateAddressRequest): Promise<AddressResponse> {
+        this.logger.info("Updating address");
+        // validate the request
+        const updateRequest: UpdateAddressRequest = this.validationService.validate(AddressValidation.UPDATE, request);
+
+        await this.contactService.checkContactExists(user.username, updateRequest.contact_id);
+
+        let address = await this.addressMustExist(updateRequest.id, updateRequest.contact_id);
+
+        address = await this.prismaService.address.update({
+            where: {
+                id: updateRequest.id,
+                contact_id: updateRequest.contact_id
+            },
+            data: updateRequest
+        });
+
+
+        return this.toAddressResponse(address);
     }
 
     async remove() {
