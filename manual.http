@@ -1,0 +1,139 @@
+POST http://localhost:3000/api/users
+Content-Type: application/json
+Accept: application/json
+
+{
+    "username": "agussutarom",
+    "password": "agus123",
+    "name": "Agus Sutarom"
+}
+
+### Login User
+POST http://localhost:3000/api/users/login
+Content-Type: application/json
+Accept: application/json
+
+{
+    "username": "agussutarom",
+    "password": "agus456"
+}
+
+### Get User
+GET http://localhost:3000/api/users/current
+Accept: application/json
+Authorization: 11325a40-de33-4fa1-8873-7ed6d29a8549
+
+### Logout User
+DELETE http://localhost:3000/api/users/current
+Accept: application/json
+Authorization: 11325a40-de33-4fa1-8873-7ed6d29a8549
+
+### Update User
+PATCH  http://localhost:3000/api/users/current
+Accept: application/json
+Content-Type: application/json
+Authorization: 11325a40-de33-4fa1-8873-7ed6d29a8549
+
+{
+    "name": "Agus Sutarom Updated"
+}
+
+### Update User Password
+PATCH  http://localhost:3000/api/users/current
+Accept: application/json
+Content-Type: application/json
+Authorization: 11325a40-de33-4fa1-8873-7ed6d29a8549
+
+{
+    "password": "agus456"
+}
+
+### Insert Contact
+POST  http://localhost:3000/api/contacts
+Accept: application/json
+Content-Type: application/json
+Authorization: 11325a40-de33-4fa1-8873-7ed6d29a8549
+
+{
+    "first_name": "Yuli Desianti",
+    "last_name": "Kusuma",
+    "email": "ylkusuma@gmail.com",
+    "phone": "784212445578"
+}
+
+### Update Contact
+PUT http://localhost:3000/api/contacts/1
+Accept: application/json
+Content-Type: application/json
+Authorization: 11325a40-de33-4fa1-8873-7ed6d29a8549
+
+{
+    "first_name": "Khoirul Abdullah",
+    "last_name": "Fitrianto",
+    "email": "khoirulaf@gmail.com",
+    "phone": "8715541111"
+}
+
+### GET Contact
+GET http://localhost:3000/api/contacts/1
+Accept: application/json
+Authorization: 11325a40-de33-4fa1-8873-7ed6d29a8549
+
+### DELETE Contact
+DELETE http://localhost:3000/api/contacts/2
+Accept: application/json
+Authorization: 11325a40-de33-4fa1-8873-7ed6d29a8549
+
+### GET Contact
+GET http://localhost:3000/api/contacts/2
+Accept: application/json
+Authorization: 11325a40-de33-4fa1-8873-7ed6d29a8549
+
+### Search Contact
+GET http://localhost:3000/api/contacts?name=th
+Accept: application/json
+Authorization: 11325a40-de33-4fa1-8873-7ed6d29a8549
+
+
+### Insert Address
+POST  http://localhost:3000/api/contacts/1/addresses
+Accept: application/json
+Content-Type: application/json
+Authorization: 11325a40-de33-4fa1-8873-7ed6d29a8549
+
+{
+    "street": "Jl. Maimbo No. 1",
+    "city": "Malang",
+    "province": "Jawa Timur",
+    "country": "Indonesia",
+    "postal_code": "62532"
+}
+
+### Get Address List
+GET  http://localhost:3000/api/contacts/1/addresses
+Accept: application/json
+Authorization: 11325a40-de33-4fa1-8873-7ed6d29a8549
+
+### Get Address
+GET  http://localhost:3000/api/contacts/1/addresses/1
+Accept: application/json
+Authorization: 11325a40-de33-4fa1-8873-7ed6d29a8549
+
+### Update Address
+PUT http://localhost:3000/api/contacts/1/addresses/1
+Accept: application/json
+Content-Type: application/json
+Authorization: 11325a40-de33-4fa1-8873-7ed6d29a8549
+
+{
+    "street": "Jl. Maimbawat No. 123",
+    "city": "Tuban",
+    "province": "Jawa Timur",
+    "country": "Indonesia",
+    "postal_code": "62532"
+}
+
+### DELETE Address
+DELETE http://localhost:3000/api/contacts/1/addresses/2
+Accept: application/json
+Authorization: 11325a40-de33-4fa1-8873-7ed6d29a8549
