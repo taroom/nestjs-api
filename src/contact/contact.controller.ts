@@ -70,7 +70,7 @@ export class ContactController {
     @Auth() user: User,
     @Param('contactId', ParseIntPipe) contactId: number,
   ): Promise<WebResponse<boolean>> {
-    await this.contactService.get(user, contactId);
+    await this.contactService.remove(user, contactId);
     return {
       data: true,
     };
